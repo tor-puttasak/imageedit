@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
+model Style {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  prompt    String   @db.Text
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  generatedImages GeneratedImage[]
+
+  @@map("styles")
+}
+
+model GeneratedImage {
+  id                String   @id @default(cuid())
+  originalImageUrl  String
+  generatedImageUrl String
+  styleName         String
+  styleId           String?
+  userText          String?
+  customPrompt      String?  @db.Text
+  isPublic          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+
+  style Style? @relation(fields: [styleId], references: [id], onDelete: SetNull)
+
+  @@map("generated_images")
+}
